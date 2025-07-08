@@ -1,50 +1,38 @@
 name: CDK Deploy
 
 on:
-    push:
-        branches:
-            - main
+  push:
+    branches:
+      - main
 
 jobs:
-    deploy:
-        runs-on: ubuntu-latest
+  deploy:
+    runs-on: ubuntu-latest
 
-        steps:
-            - name: checkout code
-              uses: actions/checkout@v3
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-            - name: Setup NodeJS
-              uses: actions/setup-node@v3
-              with:
-                node-version: 22
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
 
-            - name: Setup Python
-              uses: actions/setup-python@v4
-              with:
-                python-version: 3.12
-            
-            - name: Configure AWS credentials
-              uses: aws-actions/configure-aws-credentials@v2
-              with:
-                aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-                aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-                aws-region: ${{ secrets.CDK_DEFAULT_REGION }}
+      - name: Install dependencies
+        run: npm install
 
-            - name: Install dependencies (CDK)
-              run: |
-                npm install
-                npm run build
+      - name: Build CDK
+        run: npm run build
 
-            - name: Install Docker (bundling Lambda)
-              run: |
-                sudo apt-get update
-                sudo apt-get install -y docker.io
-                sudo service docker start
-                sudo usermod -aG docker $USER
+      - name: Install AWS CDK CLI
+        run: npm install -g aws-cdk
 
-            - name: CDK deploy
-              run: |
-                npm install -g aws-cdk
-                cdk bootstrap
-                cdk deploy --require-approval never
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-1
 
+      - name: Deploy CDK stack
+        run: cdk deploy --require-approval never
