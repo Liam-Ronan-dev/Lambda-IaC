@@ -32,7 +32,7 @@ export class TodoInfraStack extends cdk.Stack {
     // Create a Lambda function
     const api = new lambda.Function(this, "API", {
       runtime: lambda.Runtime.PYTHON_3_12,
-      code: lambda.Code.fromAsset('../api', {
+      code: lambda.Code.fromAsset('api', {
         // Uses docker image, package dependencies for Lambda
         bundling: {
           image: lambda.Runtime.PYTHON_3_12.bundlingImage,
